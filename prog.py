@@ -22,7 +22,8 @@ def main(argv):
     parser.add_argument("players", help="Number of Golfers (1-4)")
     parser.add_argument("holes", help="Number of Holes desired. 1 = 9 Holes, 2 = 18 Holes, 3 = Either")
     parser.add_argument("maxprice", help="The maximum total price of the round for all golfers")
-    parser.add_argument("--estimate", help="Set the \"Estimate\" flag to only search based on base price of the round, excluding additional fees (faster", action="store_true")
+    parser.add_argument("--estimate", help="Set the \"Estimate\" flag to only search based on base price of the round, excluding additional fees (faster)", action="store_true")
+    parser.add_argument("--hotdealsonly", help="Search for only Hot Deals", action="store_true")
     args = parser.parse_args()  # returns data from the options specified (echo)
 
     # set the variables based on input
@@ -38,6 +39,10 @@ def main(argv):
     LATITUDE = geolocator.geocode(ZIPCODE).latitude
     ADDRESS = geolocator.geocode(ZIPCODE).address
 
+    if args.hotdealsonly:
+        HOTDEALSONLY = "True"
+    else:
+        HOTDEALSONLY = "False"
     # loop for each day of the week and find courses for each day
     # can only search up to 1 week ahead of time
     print "Searching for Golf Courses near " + ADDRESS
@@ -45,7 +50,7 @@ def main(argv):
     date = months[int(DATE[0:2])] + " " + DATE[3:5] + " " + DATE[-4:]
     print "Date: " + date
     postData = {"Radius": RADIUS, "Latitude": LATITUDE, "Longitude": LONGITUDE, "PageSize": "30", "PageNumber": "0",
-                "SearchType": "GeoLocation", "SortBy": "Facilities.Distance", "SortDirection": "0", "Date": date,
+                "SearchType": "GeoLocation", "SortBy": "Facilities.Distance", "SortDirection": "0", "Date": date, "HotDealsOnly":HOTDEALSONLY,
                 "Players": PLAYERS, "RateType": "all", "TimeMin": "10", "TimeMax": "47",
                 "SortByRollup": "Facilities.Distance", "View": "Course", "ExcludeFeaturedFacilities": "false",
                 "Q": ZIPCODE, "QC": "GeoLocation"}
@@ -67,7 +72,7 @@ def main(argv):
 
         # get the list of all facilities
         url2 = "https://www.golfnow.com/api/tee-times/tee-time-results"
-        postData2 = {"Radius": RADIUS, "PageSize": "30", "PageNumber": "0", "SearchType": "1", "SortBy": "Date",
+        postData2 = {"Radius": RADIUS, "PageSize": "30", "PageNumber": "0", "SearchType": "1", "SortBy": "Date", "HotDealsOnly":HOTDEALSONLY,
                      "SortDirection": "0", "Date": date, "Players": PLAYERS, "TimePeriod": "3", "Holes": HOLES,
                      "RateType": "all", "TimeMin": "10", "TimeMax": "47", "FacilityId": facID,
                      "SortByRollup": "Facilities.Distance", "View": "List", "ExcludeFeaturedFacilities": "false",
